@@ -2,6 +2,7 @@
 body {
 	margin:0;
 	padding:0;
+	background-color:black;
 }
 canvas {
 	width: 100%;
@@ -13,7 +14,7 @@ canvas {
 	margin-left:5px;
 	position:fixed;
 	border:0;
-	width:200px;
+	width:auto;
 	height:60px;
 	z-index:2;
 	padding:15px;

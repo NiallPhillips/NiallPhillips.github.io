@@ -18,7 +18,7 @@ canvas {
 	width:auto;
 	height:60px;
 	z-index:2;
-	padding:15px;
+	padding:15px 0 15px 0;
 	color:#44ABDA;
 	font: 30px bold arial, sans-serif;
 }
@@ -29,11 +29,12 @@ canvas {
 	border:0;
 	padding:15px;
 	width:452px;
-	height:45px;
+	height:60px;
 	bottom:0px;
 	left:50%;;
 	z-index:2;
 	color:#44ABDA;
 	font: 15px bold arial, sans-serif;
 	transform: translate(-50%,0);
+	text-align:center;
 }

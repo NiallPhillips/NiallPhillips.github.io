@@ -16,9 +16,11 @@ var cubeGeom = new THREE.CubeGeometry(10, 10, 10);
 
 //Load the image to be used to texture the cubes
 var noteImage = new THREE.TextureLoader().load("images/quaver.jpg");
+var cubeMat = new Physijs.createMaterial(new THREE.MeshStandardMaterial({map:noteImage}),0.4,1);
 
 
 var cubes = [];			//Holds all of the scenes cubes
+var cubeMeshes = [];
 var cubeColliders = [];	//Holds all of the cubes boxHelper objects
 var box3Colliders = [];	//Holds all of the boxHelper collision boxes
 var hitFlags = [];		//Flags used to ensure collision is detected only once every bar pass
@@ -30,6 +32,8 @@ var audioctx = new AudioContext();
 var clock;
 var timeDelta;
 
+var rayCaster;
+var mouse = new THREE.Vector2(), INTERSECTED;
 
 function initScene() {
     "use strict"; //Prevents accidental creation of global variables
@@ -38,6 +42,8 @@ function initScene() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	document.body.appendChild(renderer.domElement);
 	window.addEventListener('resize', onWindowResize, false);
+	document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+	document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 	
 	scene.setGravity(new THREE.Vector3(0, -50, 0)); //Set the gravity for the physics
 	
@@ -86,6 +92,8 @@ function initScene() {
 	var gridHelper = new THREE.GridHelper( 50, 8 );
 	scene.add( gridHelper );
 	
+	rayCaster = new THREE.Raycaster();
+	
 	render();
 }
 
@@ -103,6 +111,8 @@ function render() {
 	timeDelta = clock.getDelta(); //Update clock used for controlling movement speed every render pass
 	controls.update(); //Update camera with 'OrbitControls' input from the user
 	scene.simulate(); //Render phsyics
+	
+	rayCaster.setFromCamera( mouse, camera );
 	
 	
 	//Loop handles the movement and playback of the 'bar' object
@@ -129,24 +139,32 @@ function render() {
 	//Also deletes cubes from the scene if it has fallen off the ground
 	for (var i = 0;i<cubes.length;i++) {
 		
+		if(control.deleteMode) {
+			cubes[i].material.emissive.setHex(0xff0000);
+		}
+		
 		cubeColliders[i].update(cubes[i].mesh);
 		box3Colliders[i].setFromObject(cubeColliders[i]);
 		
-		
-		if(box3Colliders[i].intersectsBox(barBox)&&hitFlags[i]==0&&control.isPlaying) {
-			hitFlags[i] = 1;
-			cubes[i].playNote();
+		if(box3Colliders[i].intersectsBox(barBox)&&control.isPlaying) {
+			if(hitFlags[i]==0) {
+				hitFlags[i] = 1;
+				if(!control.deleteMode) {cubes[i].material.emissive.setHex(0x0000ff);}
+				cubes[i].playNote();
+			}
+			if(!control.deleteMode){
+				cubes[i].material.emissive.setHex(0x0000ff);
+				cubes[i].material.emissiveIntensity = 5;
+			}
+			} else {
+			if(!control.deleteMode){
+				cubes[i].material.emissive.setHex(0x000000);
+				cubes[i].material.emissiveIntensity = 1;
+			}
 		}
 		
-		if(cubes[i].mesh.position.y < -100){
-			scene.remove(cubes[i]);
-			scene.remove(cubeColliders[i]);
-			scene.remove(box3Colliders[i]);
-			cubes.splice(i,i);
-			cubeColliders.splice(i,i);
-			box3Colliders.splice(i,i);
-			hitFlags.splice(i,i);
-			updateCubeCounter();
+		if(cubes[i].mesh.position.y < -300){
+			deleteCube(i);
 		}
 	}
 	
@@ -168,6 +186,28 @@ function onWindowResize() {
 	
 }
 
+function onDocumentMouseMove( event ) {
+	event.preventDefault();
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+}
+
+function onDocumentMouseDown( event ) {
+	event.preventDefault();
+	if(control.deleteMode&&event.button==0) {
+		var intersects = rayCaster.intersectObjects( cubeMeshes );
+		if ( intersects.length > 0 ) {
+			var intersect = intersects[ 0 ];
+			// delete cube
+			deleteCube(cubeMeshes.indexOf(intersect.object));
+		}
+	}
+	if(control.deleteMode&&event.button==2) {
+		control.deleteMode=false;
+	}
+	
+}
+
 //Entry point for the application
 //Function called on window load
 function startApp() {
@@ -176,11 +216,24 @@ function startApp() {
 	
 }
 
+function deleteCube(number) {
+	scene.remove(cubes[number].mesh);
+	scene.remove(cubeColliders[number]);
+	scene.remove(box3Colliders[number]);
+	cubes.splice(number,1);
+	cubeMeshes.splice(number,1);
+	cubeColliders.splice(number,1);
+	box3Colliders.splice(number,1);
+	hitFlags.splice(number,1);
+	updateCubeCounter();
+}
+
 //newCube() creates a new instance of Cube, BoxHelper and Box3
 //These instances are appended to the corresponding array and added to the scene
 function newCube(noteValue) {
 	if(cubes.length < 8) {
 		cubes[cubes.length] = new Cube(noteValue);
+		cubeMeshes[cubeMeshes.length] = cubes[cubes.length-1].mesh;
 		cubeColliders[cubeColliders.length] = new THREE.BoxHelper(cubes[cubes.length-1].mesh,0x0000ff);
 		box3Colliders[box3Colliders.length] = new THREE.Box3();
 		
@@ -218,7 +271,7 @@ function newCube(noteValue) {
 //All the functions for updating and playing audio are defined here
 function Cube(scalar) {
 	this.geometry = cubeGeom.clone();
-	this.material = new Physijs.createMaterial(new THREE.MeshStandardMaterial({map:noteImage}),0.4,1);
+	this.material = cubeMat.clone();
 	this.mesh = new Physijs.BoxMesh( this.geometry, this.material,3 );
 	this.mesh.scale.set(scalar,scalar,scalar);
 	this.noteLength;
@@ -298,4 +351,4 @@ function updateCubeCounter() {
 	if(cubes.length==8) {
 		document.getElementById('cubeCounter').innerHTML = ("Cubes remaining: "+ (8-cubes.length)+"<br> :(");
 	}else {document.getElementById('cubeCounter').innerHTML = ("Cubes Remaining: "+ (8-cubes.length));}
-}
+}			

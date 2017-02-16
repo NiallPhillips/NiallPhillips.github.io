@@ -187,13 +187,13 @@ function onWindowResize() {
 }
 
 function onDocumentMouseMove( event ) {
-	event.preventDefault();
+	//~ event.preventDefault(); //preventDefault() on mouse events appears to break some functionality of dat.gui
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
 
 function onDocumentMouseDown( event ) {
-	event.preventDefault();
+	//~ event.preventDefault();
 	if(control.deleteMode&&event.button==0) {
 		var intersects = rayCaster.intersectObjects( cubeMeshes );
 		if ( intersects.length > 0 ) {

@@ -27,13 +27,19 @@ var hitFlags = [];		//Flags used to ensure collision is detected only once every
 var bar;
 var barBoundingBox;
 var barBox;
+
+var chunks = [];
 var audioctx = new AudioContext();
+var dest = audioctx.createMediaStreamDestination();
+var mediaRecorder = new MediaRecorder(dest.stream);
 
 var clock;
 var timeDelta;
 
 var rayCaster;
 var mouse = new THREE.Vector2(), INTERSECTED;
+
+
 
 function initScene() {
     "use strict"; //Prevents accidental creation of global variables
@@ -215,6 +221,32 @@ function startApp() {
 	initScene();
 	
 }
+  
+mediaRecorder.ondataavailable = function(evt) {
+    // push each chunk (blobs) in an array
+    chunks.push(evt.data);
+};
+
+mediaRecorder.onstop = function(evt) {
+    // Make blob out of our blobs, and open it.
+    var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
+    var url = URL.createObjectURL(blob);
+	var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+	a.href = url;
+	var fileName = prompt('Enter a name for your sound clip?','My_Melody');
+    a.download = fileName+".ogg";
+    a.click();
+    window.URL.revokeObjectURL(url);
+};
+
+function startRecord() {
+	mediaRecorder.start();
+}
+function stopRecord() {
+	mediaRecorder.stop();
+}
 
 function deleteCube(number) {
 	scene.remove(cubes[number].mesh);
@@ -258,8 +290,6 @@ function newCube(noteValue) {
 		);
 		scene.add(cubes[cubes.length-1].mesh);
 		scene.add(cubeColliders[cubeColliders.length-1]);
-		
-		cubes[cubes.length-1].updateNoteLength(); //Sets the length of the cubes note based on its noteValue
 		
 		updateCubeCounter();
 		} else {
@@ -332,6 +362,7 @@ function Cube(scalar) {
 	//The note is then played for a duration of 'noteLength'
 	this.playNote = function(){
 		this.updateNote();
+		this.updateNoteLength();
 		//A new oscillator must be created everytime a note is played
 		oscillator = audioctx.createOscillator();
 		oscillator.frequency.value = this.note;
@@ -340,6 +371,7 @@ function Cube(scalar) {
 		oscillator.type = control.Wave;
 		oscillator.connect(gainNode);
 		gainNode.connect(audioctx.destination);
+		gainNode.connect(dest);
 		oscillator.start(0);
 		gainNode.gain.setTargetAtTime(0, audioctx.currentTime+this.noteLength, 0.01);
 	};

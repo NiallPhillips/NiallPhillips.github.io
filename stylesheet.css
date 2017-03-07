@@ -38,3 +38,12 @@ canvas {
 	transform: translate(-50%,0);
 	text-align:center;
 }
+
+.recordingAnim {
+	animation: color-change 2s ease-in-out 0s infinite;
+}
+@keyframes color-change {
+        0% { background-color: null; }
+        50% { background-color: red; }
+        100% { background-color: null; }
+    }

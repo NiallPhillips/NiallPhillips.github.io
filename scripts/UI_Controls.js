@@ -2,6 +2,7 @@
 control = new function() {
 	this.isPlaying = false;
 	this.deleteMode = false;
+	this.isRecording = false;
 	
 	this.playPause = function() {
 		if(this.isPlaying) {
@@ -19,6 +20,26 @@ control = new function() {
 			} else {
 			this.deleteMode = true;
 			console.log("Delete mode on");
+		}
+	}
+	this.record = function() {
+	
+		var recBtn = document.getElementsByClassName('dg main a')[0].getElementsByTagName('ul')[0].childNodes[9];
+		
+		if(this.isRecording) {
+			stopRecord();
+			this.isRecording = false;
+			this.isPlaying = false;
+			recBtn.classList.remove("recordingAnim");
+			recBtn.getElementsByTagName('div')[0].getElementsByClassName('property-name')[0].innerHTML="Record Audio";
+			console.log("Stopped Recording");
+			} else if(cubes.length>0){
+			startRecord();
+			this.isPlaying = true;
+			this.isRecording = true;
+			recBtn.classList.add("recordingAnim");
+			recBtn.getElementsByTagName('div')[0].getElementsByClassName('property-name')[0].innerHTML="Recording...";
+			console.log("Recording");
 		}
 	}
 	
@@ -62,4 +83,5 @@ function addControlGui(controlObject) {
 	gui.add(controlObject, 'Delay', 0, 10).name("Delay");
 	gui.add(controlObject, 'Reverb', 0, 10).name("Reverb");
 	gui.add(controlObject, 'Wave', ['sine','triangle','sawtooth','square']);
+	gui.add(controlObject, 'record').name("Record Audio");
 }

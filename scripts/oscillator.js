@@ -62,7 +62,6 @@ var half = 0.5;
 var whole = 1;
 
 
-
 function initScene() {
     "use strict"; //Prevents accidental creation of global variables
     

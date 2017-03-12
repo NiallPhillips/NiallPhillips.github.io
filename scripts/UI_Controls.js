@@ -58,8 +58,9 @@ control = new function() {
 	this.Reverb = 0.00;
 };
 
-//Add eventListener for keyboard shortcuts
-document.addEventListener('keydown',(event) => {
+function createKeyEvents() {
+	//Add eventListener for keyboard shortcuts
+	document.addEventListener('keydown',(event) => {
 	if(event.key == ' ') {
 		control.isPlaying = !control.isPlaying;
 	}
@@ -67,7 +68,9 @@ document.addEventListener('keydown',(event) => {
 		control.deleteMode = !control.deleteMode;
 	}
 });
+}
 
+createKeyEvents();
 addControlGui(control);
 
 //Creates new GUI object and adds elements from the control object to it

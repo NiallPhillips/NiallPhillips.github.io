@@ -54,8 +54,8 @@ control = new function() {
 	}
 	this.Wave = 'sine';
 	this.BPM = 160.00;
-	this.Delay = 0.00;
-	this.Reverb = 0.00;
+	this.Delay = 0;
+	this.Reverb = 0;
 };
 
 function createKeyEvents() {
@@ -83,7 +83,7 @@ function addControlGui(controlObject) {
 	gui.add(controlObject, 'makeQuarterCube').name("Add Quarter Note");
 	gui.add(controlObject, 'deleteCube').name("Delete Cube");
 	gui.add(controlObject, 'BPM', 0, 300).name("Tempo");
-	gui.add(controlObject, 'Delay', 0, 10).name("Delay");
+	gui.add(controlObject, 'Delay', 0, 1).name("Delay").min(0).max(1).step(0.01);
 	gui.add(controlObject, 'Reverb', 0, 10).name("Reverb");
 	gui.add(controlObject, 'Wave', ['sine','triangle','sawtooth','square']);
 	gui.add(controlObject, 'record').name("Record Audio");

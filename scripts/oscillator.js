@@ -61,6 +61,12 @@ var quarter = 0.25;
 var half = 0.5;
 var whole = 1;
 
+var delay = audioctx.createDelay();
+delay.delayTime.value = control.Delay;
+var delayGain = audioctx.createGain();
+    delayGain.gain.value = 0.5;
+var feedback = audioctx.createGain();
+    feedback.gain.value = 0.5;
 
 function initScene() {
     "use strict"; //Prevents accidental creation of global variables
@@ -141,6 +147,7 @@ function render() {
 	
 	rayCaster.setFromCamera( mouse, camera );
 	
+	delay.delayTime.value = control.Delay;
 	
 	//Loop handles the movement and playback of the 'bar' object
 	//It updates the bars position, hitbox, movement speed if the application 'isPlaying'
@@ -391,7 +398,12 @@ function Cube(scalar) {
 		gainNode.gain.value = 0.3; // Reduced gain to prevent clipping
 		oscillator.type = control.Wave;
 		oscillator.connect(gainNode);
+		delay.connect(feedback);
+		feedback.connect(delay);
+		gainNode.connect(delay);
 		gainNode.connect(audioctx.destination);
+		delay.connect(delayGain);
+		delayGain.connect(audioctx.destination);
 		gainNode.connect(dest);
 		oscillator.start(0);
 		gainNode.gain.setTargetAtTime(0, audioctx.currentTime+this.noteLength, 0.01);

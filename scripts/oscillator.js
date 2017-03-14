@@ -34,7 +34,6 @@ var dest = audioctx.createMediaStreamDestination();
 var mediaRecorder = new MediaRecorder(dest.stream);
 
 var clock;
-var timeDelta;
 
 var rayCaster;
 var mouse = new THREE.Vector2(), INTERSECTED;
@@ -149,7 +148,7 @@ function render() {
     "use strict"; 
 	requestAnimationFrame(render);
 	////////////////////////////////////
-	timeDelta = clock.getDelta(); //Update clock used for controlling movement speed every render pass
+	var timeDelta = clock.getDelta(); //Update clock used for controlling movement speed every render pass
 	controls.update(); //Update camera with 'OrbitControls' input from the user
 	scene.simulate(); //Render phsyics
 	

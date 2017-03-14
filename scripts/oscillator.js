@@ -67,6 +67,14 @@ var delayGain = audioctx.createGain();
     delayGain.gain.value = 0.5;
 var feedback = audioctx.createGain();
     feedback.gain.value = 0.5;
+	
+var convolverGain = audioctx.createGain();
+	convolverGain.gain.value = control.Reverb;
+var convolver = audioctx.createConvolver();
+var impulseUrl = 'sounds/irHall.ogg';
+
+var gainNode;
+gainNode = audioctx.createGain();
 
 function initScene() {
     "use strict"; //Prevents accidental creation of global variables
@@ -148,6 +156,7 @@ function render() {
 	rayCaster.setFromCamera( mouse, camera );
 	
 	delay.delayTime.value = control.Delay;
+	convolverGain.gain.value = control.Reverb;
 	
 	//Loop handles the movement and playback of the 'bar' object
 	//It updates the bars position, hitbox, movement speed if the application 'isPlaying'
@@ -247,7 +256,35 @@ function onDocumentMouseDown( event ) {
 function startApp() {
 	
 	initScene();
-	
+	getImpulse();
+}
+
+function getImpulse() {
+  ajaxRequest = new XMLHttpRequest();
+  ajaxRequest.open('GET', impulseUrl, true);
+  ajaxRequest.responseType = 'arraybuffer';
+
+  ajaxRequest.onload = function() {
+    var impulseData = ajaxRequest.response;
+
+		audioctx.decodeAudioData(impulseData, function(buffer) {
+        myImpulseBuffer = buffer;
+        convolver.buffer = myImpulseBuffer;
+        convolver.loop = true;
+		convolver.normalize = true;
+        convolverGain.gain.value = 0;
+		gainNode.connect(convolverGain);
+        convolverGain.connect(convolver);
+		convolver.connect(dest);
+		convolver.connect(audioctx.destination);
+		console.log("reverb loaded");
+      },
+
+      function(e){"Error with decoding audio data" + e.err});
+
+  }
+
+  ajaxRequest.send();
 }
   
 mediaRecorder.ondataavailable = function(evt) {
@@ -333,7 +370,7 @@ function Cube(scalar) {
 	this.mesh = new Physijs.BoxMesh( this.geometry, this.material,3 );
 	this.mesh.scale.set(scalar,scalar,scalar);
 	this.noteLength;
-	var oscillator, gainNode;
+	var oscillator;
 	
 	//Set the note length based on control.BPM
 	this.updateNoteLength = function(){
@@ -401,10 +438,10 @@ function Cube(scalar) {
 		delay.connect(feedback);
 		feedback.connect(delay);
 		gainNode.connect(delay);
-		gainNode.connect(audioctx.destination);
+		gainNode.connect(convolverGain);
 		delay.connect(delayGain);
 		delayGain.connect(audioctx.destination);
-		gainNode.connect(dest);
+		delayGain.connect(dest);
 		oscillator.start(0);
 		gainNode.gain.setTargetAtTime(0, audioctx.currentTime+this.noteLength, 0.01);
 	};

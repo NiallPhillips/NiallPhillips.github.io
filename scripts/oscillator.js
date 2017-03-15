@@ -376,7 +376,6 @@ function Cube(scalar) {
 		this.noteLength = 1/(control.BPM/60)*scalar
 	};
 	
-	//this.updateNote is repeatedly called in the render loop to update a cubes note value.
 	//The floor geometry is divided into steps of 8 values and the cubes position on that grid
 	//determines its note frequency
 	this.updateNote = function(){

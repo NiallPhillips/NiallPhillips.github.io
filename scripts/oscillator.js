@@ -272,7 +272,7 @@ function getImpulse() {
         convolver.loop = true;
 		convolver.normalize = true;
         convolverGain.gain.value = 0;
-		gainNode.connect(convolverGain);
+		// gainNode.connect(convolverGain);
         convolverGain.connect(convolver);
 		convolver.connect(dest);
 		convolver.connect(audioctx.destination);
@@ -437,6 +437,8 @@ function Cube(scalar) {
 		delay.connect(feedback);
 		feedback.connect(delay);
 		gainNode.connect(delay);
+		gainNode.connect(audioctx.destination);
+		gainNode.connect(dest);
 		gainNode.connect(convolverGain);
 		delay.connect(delayGain);
 		delayGain.connect(audioctx.destination);

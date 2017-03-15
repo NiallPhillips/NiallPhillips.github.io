@@ -155,7 +155,7 @@ function render() {
 	rayCaster.setFromCamera( mouse, camera );
 	
 	delay.delayTime.value = control.Delay;
-	convolverGain.gain.value = control.Reverb;
+	convolverGain.gain.value = control.Reverb/2;
 	
 	//Loop handles the movement and playback of the 'bar' object
 	//It updates the bars position, hitbox, movement speed if the application 'isPlaying'

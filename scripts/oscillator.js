@@ -60,6 +60,7 @@ var quarter = 0.25;
 var half = 0.5;
 var whole = 1;
 
+// Create nodes for web audio
 var delay = audioctx.createDelay();
 delay.delayTime.value = control.Delay;
 var delayGain = audioctx.createGain();
@@ -258,6 +259,7 @@ function startApp() {
 	getImpulse();
 }
 
+// Creates an XMLHttprequest() to load the 'irHall.ogg' from the server
 function getImpulse() {
   ajaxRequest = new XMLHttpRequest();
   ajaxRequest.open('GET', impulseUrl, true);
@@ -292,7 +294,7 @@ mediaRecorder.ondataavailable = function(evt) {
 };
 
 mediaRecorder.onstop = function(evt) {
-    // Make blob out of our blobs, and open it.
+    // Make blob out of chunks[], and open it.
     var blob = new Blob(chunks, { 'type' : 'audio/ogg; codecs=opus' });
     var url = URL.createObjectURL(blob);
 	var a = document.createElement("a");
@@ -415,11 +417,7 @@ function Cube(scalar) {
 			break;
 		}
 	};
-	
-	//Function to snap cube position to timing grid
-	this.quantize = function(){
-		
-	};
+
 	
 	//this.playNote creates a new oscillator, sets its note, gain and wave type.
 	//The note is then played for a duration of 'noteLength'

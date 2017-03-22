@@ -442,6 +442,7 @@ function Cube(scalar) {
 		delayGain.connect(dest);
 		oscillator.start(0);
 		gainNode.gain.setTargetAtTime(0, audioctx.currentTime+this.noteLength, 0.01);
+		oscillator.stop(audioctx.currentTime+this.noteLength+0.1);
 	};
 }
 
